@@ -12,6 +12,6 @@ jobs:
         CI: "1"
     steps:
       - uses: actions/checkout@v2
-      - run: make local-check
-      - run: make local-test
-      - run: make local-critic
+      - run: make ci-check
+      - run: make ci-test
+      - run: make ci-critic
