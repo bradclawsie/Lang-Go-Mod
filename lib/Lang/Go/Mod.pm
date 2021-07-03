@@ -1,6 +1,5 @@
 package Lang::Go::Mod;
-use strict;
-use warnings;
+use strictures 2;
 
 # ABSTRACT: Parse and model go.mod files
 
@@ -22,5 +21,11 @@ Parse and model go.mod files.
 =head1 DESCRIPTION
 
 Parse and model go.mod files.
+
+=head1 LICENSE 
+
+Lang::Go::Mod is licensed under the same terms as Perl itself.
+
+https://opensource.org/licenses/artistic-license-2.0
 
 =cut
