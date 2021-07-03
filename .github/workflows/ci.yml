@@ -1,0 +1,17 @@
+name: ci
+on: [push]
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    container:
+      image: b7j0c/perl:5.34.0
+      env:
+        PERL5LIB: "/__w/Lang-Go-Mod/Lang-Go-Mod/lib"
+        PERLCRITIC: "/__w/Lang-Go-Mod/Lang-Go-Mod/.perlcritic"
+        CHECKOUT_PATH: "/__w/Lang-Go-Mod/Lang-Go-Mod"
+        CI: "1"
+    steps:
+      - uses: actions/checkout@v2
+      - run: make local-check
+      - run: make local-test
+      - run: make local-critic
