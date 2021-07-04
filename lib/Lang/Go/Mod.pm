@@ -17,7 +17,9 @@ sub read_go_mod_sum {
     my $go_mod_content = path($go_mod_path)->slurp_utf8 || croak "$ERRNO";
     my $go_sum_content = path($go_sum_path)->slurp_utf8 || croak "$ERRNO";
 
-    return;
+    my $m = {};
+
+    return $m;
 }
 
 1;
