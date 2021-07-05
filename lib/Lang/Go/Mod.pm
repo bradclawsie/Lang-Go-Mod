@@ -19,6 +19,22 @@ sub read_go_mod_sum {
 
     my $m = {};
 
+    # module ...
+    if ( $go_mod_content =~ /^module\s+(\S+)$/msx ) {
+        $m->{module} = $1;
+    }
+    else {
+        croak 'no "module ..." found in go.mod';
+    }
+
+    # go ...
+    if ( $go_mod_content =~ /^go\s+(\S+)$/msx ) {
+        $m->{go} = $1;
+    }
+    else {
+        croak 'no "go ..." found in go.mod';
+    }
+
     return $m;
 }
 
