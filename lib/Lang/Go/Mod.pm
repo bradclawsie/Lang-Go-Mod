@@ -14,18 +14,18 @@ our $AUTHORITY = 'cpan:bclawsie';
 our @EXPORT_OK = qw(read_go_mod_sum parse_go_mod_sum);
 
 sub read_go_mod_sum {
-    my $use_msg = 'use: read_go_mod_sum($go_mod_path, $go_sum_path)';
+    my $use_msg     = 'use: read_go_mod_sum(go_mod_path, go_sum_path)';
     my $go_mod_path = shift || croak $use_msg;
     my $go_sum_path = shift || croak $use_msg;
 
     my $go_mod_content = path($go_mod_path)->slurp_utf8 || croak "$ERRNO";
     my $go_sum_content = path($go_sum_path)->slurp_utf8 || croak "$ERRNO";
 
-    return parse_go_mod_sum($go_mod_content, $go_sum_content);
+    return parse_go_mod_sum( $go_mod_content, $go_sum_content );
 }
 
 sub parse_go_mod_sum {
-    my $use_msg = 'use: parse_go_mod_sum($go_mod_content, $go_sum_content)';
+    my $use_msg = 'use: parse_go_mod_sum(go_mod_content, go_sum_content)';
     my $go_mod_content = shift || croak $use_msg;
     my $go_sum_content = shift || croak $use_msg;
 
@@ -48,10 +48,19 @@ sub parse_go_mod_sum {
     }
 
     # optional require ( ... )
-    if ( $go_mod_content =~ /^require\s+\(([^\)]+)\)$/msx ) {
-        $m->{require} = $1;
+    if ( $go_mod_content =~ /^require\s+[(]([^)]+)[)]$/msx ) {
+        $m->{require} = {};
+        for my $line ( split /\n/msx, $1 ) {
+            next unless ( $line =~ /\S/msx );
+            if ( $line =~ /\s*(\S+)\s+(\S+)/msx ) {
+                $m->{'require'}->{$1} = { version => $2 };
+            }
+            else {
+                croak "line $line missing pkg or version";
+            }
+        }
     }
-    
+
     return $m;
 }
 
