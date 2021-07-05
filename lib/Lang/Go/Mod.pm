@@ -3,6 +3,7 @@ use warnings;
 use strict;
 use Carp qw(croak);
 use English qw(-no_match_vars);
+use Exporter qw(import);
 use Path::Tiny qw(path);
 
 # ABSTRACT: Parse and model go.mod files
@@ -10,12 +11,23 @@ use Path::Tiny qw(path);
 our $VERSION   = '0.001';
 our $AUTHORITY = 'cpan:bclawsie';
 
+our @EXPORT_OK = qw(read_go_mod_sum parse_go_mod_sum);
+
 sub read_go_mod_sum {
-    my $go_mod_path = shift || croak 'missing: path to go.mod';
-    my $go_sum_path = shift || croak 'missing: path to go.sum';
+    my $use_msg = 'use: read_go_mod_sum($go_mod_path, $go_sum_path)';
+    my $go_mod_path = shift || croak $use_msg;
+    my $go_sum_path = shift || croak $use_msg;
 
     my $go_mod_content = path($go_mod_path)->slurp_utf8 || croak "$ERRNO";
     my $go_sum_content = path($go_sum_path)->slurp_utf8 || croak "$ERRNO";
+
+    return parse_go_mod_sum($go_mod_content, $go_sum_content);
+}
+
+sub parse_go_mod_sum {
+    my $use_msg = 'use: parse_go_mod_sum($go_mod_content, $go_sum_content)';
+    my $go_mod_content = shift || croak $use_msg;
+    my $go_sum_content = shift || croak $use_msg;
 
     my $m = {};
 
@@ -35,6 +47,11 @@ sub read_go_mod_sum {
         croak 'no "go ..." found in go.mod';
     }
 
+    # optional require ( ... )
+    if ( $go_mod_content =~ /^require\s+\(([^\)]+)\)$/msx ) {
+        $m->{require} = $1;
+    }
+    
     return $m;
 }
 
