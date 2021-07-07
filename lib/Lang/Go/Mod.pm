@@ -49,14 +49,28 @@ sub parse_go_mod_sum {
 
     # optional require ( ... )
     if ( $go_mod_content =~ /^require\s+[(]([^)]+)[)]$/msx ) {
-        $m->{require} = {};
+        $m->{'require'} = {};
         for my $line ( split /\n/msx, $1 ) {
             next unless ( $line =~ /\S/msx );
             if ( $line =~ /\s*(\S+)\s+(\S+)/msx ) {
                 $m->{'require'}->{$1} = { version => $2 };
             }
             else {
-                croak "line $line missing pkg or version";
+                croak "line $line malformed require syntax";
+            }
+        }
+    }
+
+    # optional replace ( ... )
+    if ( $go_mod_content =~ /^replace\s+[(]([^)]+)[)]$/msx ) {
+        $m->{replace} = {};
+        for my $line ( split /\n/msx, $1 ) {
+            next unless ( $line =~ /\S/msx );
+            if ( $line =~ /\s*(\S+)\s+[=][>]\s+(\S+)/msx ) {
+                $m->{replace}->{$1} = $2;
+            }
+            else {
+                croak "line $line malformed replace syntax";
             }
         }
     }
