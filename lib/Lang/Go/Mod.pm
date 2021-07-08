@@ -5,6 +5,7 @@ use Carp qw(croak);
 use English qw(-no_match_vars);
 use Exporter qw(import);
 use Path::Tiny qw(path);
+use experimental qw(switch);
 
 # ABSTRACT: Parse and model go.mod files
 
@@ -47,12 +48,46 @@ sub parse_go_mod_sum {
         croak 'no "go ..." found in go.mod';
     }
 
-    # optional require ( ... )
-    if ( $go_mod_content =~ /^require\s+[(]([^)]+)[)]$/msx ) {
-        $m->{'require'} = {};
+    # optional exclude ( ... )
+    if ( $go_mod_content =~ /^exclude\s+[(]([^)]+)[)]$/msx ) {
+        $m->{exclude} = {} unless ( defined $m->{exclude} );
         for my $line ( split /\n/msx, $1 ) {
             next unless ( $line =~ /\S/msx );
             if ( $line =~ /\s*(\S+)\s+(\S+)/msx ) {
+                croak "duplicate exclude for $1"
+                  if ( defined $m->{exclude}->{$1} );
+                $m->{exclude}->{$1} = { version => $2 };
+            }
+            else {
+                croak "line $line malformed exclude syntax";
+            }
+        }
+    }
+
+    # optional replace ( ... )
+    if ( $go_mod_content =~ /^replace\s+[(]([^)]+)[)]$/msx ) {
+        $m->{replace} = {} unless ( defined $m->{replace} );
+        for my $line ( split /\n/msx, $1 ) {
+            next unless ( $line =~ /\S/msx );
+            if ( $line =~ /\s*(\S+)\s+[=][>]\s+(\S+)/msx ) {
+                croak "duplicate replace for $1"
+                  if ( defined $m->{replace}->{$1} );
+                $m->{replace}->{$1} = $2;
+            }
+            else {
+                croak "line $line malformed replace syntax";
+            }
+        }
+    }
+
+    # optional require ( ... )
+    if ( $go_mod_content =~ /^require\s+[(]([^)]+)[)]$/msx ) {
+        $m->{'require'} = {} unless ( defined $m->{'require'} );
+        for my $line ( split /\n/msx, $1 ) {
+            next unless ( $line =~ /\S/msx );
+            if ( $line =~ /\s*(\S+)\s+(\S+)/msx ) {
+                croak "duplicate require for $1"
+                  if ( defined $m->{'require'}->{$1} );
                 $m->{'require'}->{$1} = { version => $2 };
             }
             else {
@@ -61,19 +96,9 @@ sub parse_go_mod_sum {
         }
     }
 
-    # optional replace ( ... )
-    if ( $go_mod_content =~ /^replace\s+[(]([^)]+)[)]$/msx ) {
-        $m->{replace} = {};
-        for my $line ( split /\n/msx, $1 ) {
-            next unless ( $line =~ /\S/msx );
-            if ( $line =~ /\s*(\S+)\s+[=][>]\s+(\S+)/msx ) {
-                $m->{replace}->{$1} = $2;
-            }
-            else {
-                croak "line $line malformed replace syntax";
-            }
-        }
-    }
+    # Each of exclude, replace, require can appear on their own lines
+
+    # Now go.sum...
 
     return $m;
 }
