@@ -18,8 +18,7 @@ ok(
 is( ref($m),      'HASH',                          'returned ref is hash' );
 is( $m->{module}, 'github.com/example/my-project', 'module label' );
 is( $m->{go},     '1.16',                          'go version label' );
-is( $m->{'require'}->{'github.com/google/uuid'}->{version},
-    'v1.2.0', 'require' );
+is( $m->{'require'}->{'github.com/google/uuid'}, 'v1.2.0', 'require' );
 is( $m->{replace}->{'github.com/example/my-project/pkg/env'},
     './pkg/env', 'replace' );
 

@@ -25,6 +25,106 @@ sub read_go_mod_sum {
     return parse_go_mod_sum( $go_mod_content, $go_sum_content );
 }
 
+sub _exclude {
+    my $go_mod_content = shift || croak 'use: _exclude(go_mod_content)';
+
+    my $m = {};
+
+    # optional exclude ( ... )
+    if ( $go_mod_content =~ /^exclude\s+[(]([^)]+)[)]$/msx ) {
+        my $exclude_lines = $1;
+        for my $line ( split /\n/msx, $exclude_lines ) {
+            next unless ( $line =~ /\S/msx );
+            if ( $line =~ /\s*(\S+)\s+(\S+)/msx ) {
+                $m->{$1} = [] unless ( defined $m->{$1} );
+                push @{ $m->{$1} }, $2;
+            }
+            else {
+                croak "line $line malformed exclude syntax";
+            }
+        }
+    }
+
+    # exclude per-line
+    for
+      my $exclude ( $go_mod_content =~ /^(?:exclude\s+([^(]\S+\s+\S+))\s*$/gmx )
+    {
+        my ( $module, $version ) = split /\s+/msx, $exclude;
+        $m->{$module} = [] unless ( defined $m->{$module} );
+        push @{ $m->{$module} }, $version;
+    }
+
+    return $m;
+}
+
+sub _replace {
+    my $go_mod_content = shift || croak 'use: _replace(go_mod_content)';
+
+    my $m = {};
+
+    # optional replace ( ... )
+    if ( $go_mod_content =~ /^replace\s+[(]([^)]+)[)]$/msx ) {
+        my $replace_lines = $1;
+        for my $line ( split /\n/msx, $replace_lines ) {
+            next unless ( $line =~ /\S/msx );
+            if ( $line =~ /^\s*(\S+)\s+=>\s+(\S+)\s*$/msx ) {
+                croak "duplicate replace for $1"
+                  if ( defined $m->{$1} );
+                $m->{$1} = $2;
+            }
+            else {
+                croak "line $line malformed replace syntax";
+            }
+        }
+    }
+
+    # replace per-line
+    for my $replace (
+        $go_mod_content =~ /^(?:replace\s+([^(]\S+\s+=>\s+\S+))\s*$/gmx )
+    {
+        my ( $source, $replacement ) = split /\s+=>\s+/msx, $replace;
+        croak "duplicate replace for $source"
+          if ( defined $m->{$source} );
+        $m->{$source} = $replacement;
+    }
+
+    return $m;
+}
+
+sub _require {
+    my $go_mod_content = shift || croak 'use: _require(go_mod_content)';
+
+    my $m = {};
+
+    # optional require ( ... )
+    if ( $go_mod_content =~ /^require\s+[(]([^)]+)[)]$/msx ) {
+        my $require_lines = $1;
+        for my $line ( split /\n/msx, $require_lines ) {
+            next unless ( $line =~ /\S/msx );
+            if ( $line =~ /^\s*(\S+)\s+(\S+).*$/msx ) {
+                croak "duplicate require for $1"
+                  if ( defined $m->{$1} );
+                $m->{$1} = $2;
+            }
+            else {
+                croak "line $line malformed require syntax";
+            }
+        }
+    }
+
+    # require per-line
+    for
+      my $require ( $go_mod_content =~ /^(?:require\s+([^(]\S+\s+\S+)).*$/gmx )
+    {
+        my ( $module, $version ) = split /\s+/msx, $require;
+        croak "duplicate require for $module"
+          if ( defined $m->{$module} );
+        $m->{$module} = $version;
+    }
+
+    return $m;
+}
+
 sub parse_go_mod_sum {
     my $use_msg = 'use: parse_go_mod_sum(go_mod_content, go_sum_content)';
     my $go_mod_content = shift || croak $use_msg;
@@ -48,55 +148,9 @@ sub parse_go_mod_sum {
         croak 'no "go ..." found in go.mod';
     }
 
-    # optional exclude ( ... )
-    if ( $go_mod_content =~ /^exclude\s+[(]([^)]+)[)]$/msx ) {
-        $m->{exclude} = {} unless ( defined $m->{exclude} );
-        for my $line ( split /\n/msx, $1 ) {
-            next unless ( $line =~ /\S/msx );
-            if ( $line =~ /\s*(\S+)\s+(\S+)/msx ) {
-                croak "duplicate exclude for $1"
-                  if ( defined $m->{exclude}->{$1} );
-                $m->{exclude}->{$1} = { version => $2 };
-            }
-            else {
-                croak "line $line malformed exclude syntax";
-            }
-        }
-    }
-
-    # optional replace ( ... )
-    if ( $go_mod_content =~ /^replace\s+[(]([^)]+)[)]$/msx ) {
-        $m->{replace} = {} unless ( defined $m->{replace} );
-        for my $line ( split /\n/msx, $1 ) {
-            next unless ( $line =~ /\S/msx );
-            if ( $line =~ /\s*(\S+)\s+[=][>]\s+(\S+)/msx ) {
-                croak "duplicate replace for $1"
-                  if ( defined $m->{replace}->{$1} );
-                $m->{replace}->{$1} = $2;
-            }
-            else {
-                croak "line $line malformed replace syntax";
-            }
-        }
-    }
-
-    # optional require ( ... )
-    if ( $go_mod_content =~ /^require\s+[(]([^)]+)[)]$/msx ) {
-        $m->{'require'} = {} unless ( defined $m->{'require'} );
-        for my $line ( split /\n/msx, $1 ) {
-            next unless ( $line =~ /\S/msx );
-            if ( $line =~ /\s*(\S+)\s+(\S+)/msx ) {
-                croak "duplicate require for $1"
-                  if ( defined $m->{'require'}->{$1} );
-                $m->{'require'}->{$1} = { version => $2 };
-            }
-            else {
-                croak "line $line malformed require syntax";
-            }
-        }
-    }
-
-    # Each of exclude, replace, require can appear on their own lines
+    $m->{exclude}   = _exclude($go_mod_content);
+    $m->{replace}   = _replace($go_mod_content);
+    $m->{'require'} = _require($go_mod_content);
 
     # Now go.sum...
 
@@ -118,6 +172,10 @@ Parse and model go.mod files.
 =head1 DESCRIPTION
 
 Parse and model go.mod files.
+
+=head1 REFERENCE
+
+https://golang.org/doc/modules/gomod-ref
 
 =head1 LICENSE 
 
