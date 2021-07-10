@@ -12,17 +12,44 @@ use experimental qw(switch);
 our $VERSION   = '0.001';
 our $AUTHORITY = 'cpan:bclawsie';
 
-our @EXPORT_OK = qw(read_go_mod_sum parse_go_mod_sum);
+our @EXPORT_OK = qw(read_go_mod parse_go_mod);
 
-sub read_go_mod_sum {
-    my $use_msg     = 'use: read_go_mod_sum(go_mod_path, go_sum_path)';
+sub read_go_mod {
+    my $use_msg     = 'use: read_go_mod(go_mod_path)';
     my $go_mod_path = shift || croak $use_msg;
-    my $go_sum_path = shift || croak $use_msg;
 
     my $go_mod_content = path($go_mod_path)->slurp_utf8 || croak "$ERRNO";
-    my $go_sum_content = path($go_sum_path)->slurp_utf8 || croak "$ERRNO";
 
-    return parse_go_mod_sum( $go_mod_content, $go_sum_content );
+    return parse_go_mod($go_mod_content);
+}
+
+sub parse_go_mod {
+    my $use_msg        = 'use: parse_go_mod(go_mod_content)';
+    my $go_mod_content = shift || croak $use_msg;
+
+    my $m = {};
+
+    # module ...
+    if ( $go_mod_content =~ /^module\s+(\S+)$/msx ) {
+        $m->{module} = $1;
+    }
+    else {
+        croak 'no "module ..." found in go.mod';
+    }
+
+    # go ...
+    if ( $go_mod_content =~ /^go\s+(\S+)$/msx ) {
+        $m->{go} = $1;
+    }
+    else {
+        croak 'no "go ..." found in go.mod';
+    }
+
+    $m->{exclude}   = _exclude($go_mod_content);
+    $m->{replace}   = _replace($go_mod_content);
+    $m->{'require'} = _require($go_mod_content);
+
+    return $m;
 }
 
 sub _exclude {
@@ -121,38 +148,6 @@ sub _require {
           if ( defined $m->{$module} );
         $m->{$module} = $version;
     }
-
-    return $m;
-}
-
-sub parse_go_mod_sum {
-    my $use_msg = 'use: parse_go_mod_sum(go_mod_content, go_sum_content)';
-    my $go_mod_content = shift || croak $use_msg;
-    my $go_sum_content = shift || croak $use_msg;
-
-    my $m = {};
-
-    # module ...
-    if ( $go_mod_content =~ /^module\s+(\S+)$/msx ) {
-        $m->{module} = $1;
-    }
-    else {
-        croak 'no "module ..." found in go.mod';
-    }
-
-    # go ...
-    if ( $go_mod_content =~ /^go\s+(\S+)$/msx ) {
-        $m->{go} = $1;
-    }
-    else {
-        croak 'no "go ..." found in go.mod';
-    }
-
-    $m->{exclude}   = _exclude($go_mod_content);
-    $m->{replace}   = _replace($go_mod_content);
-    $m->{'require'} = _require($go_mod_content);
-
-    # Now go.sum...
 
     return $m;
 }
