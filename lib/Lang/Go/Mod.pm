@@ -12,7 +12,7 @@ use experimental qw(switch);
 our $VERSION   = '0.001';
 our $AUTHORITY = 'cpan:bclawsie';
 
-our @EXPORT_OK = qw(read_go_mod parse_go_mod);
+our @EXPORT_OK = qw(read_go_mod parse_go_mod parse_by_line);
 
 sub read_go_mod {
     my $use_msg     = 'use: read_go_mod(go_mod_path)';
@@ -149,6 +149,106 @@ sub _require {
         $m->{$module} = $version;
     }
 
+    return $m;
+}
+
+sub parse_by_line {
+    my $go_mod_content = shift || croak 'use: parse_by_line(go_mod_content)';
+
+    my ( $m_exclude, $m_replace, $m_require, $m ) = ( {}, {}, {}, {} );
+    my ( $excludes, $replaces, $requires ) = ( 0, 0, 0 );
+  LINE: for my $line ( split /\n/msx, $go_mod_content ) {
+        next LINE if ( $line =~ /^\s*$/msx );
+        if ($excludes) {
+            if ( $line =~ /^\s*[)]\s*$/msx ) {
+                $excludes = 0;
+            }
+            elsif ( $line =~ /\s*(\S+)\s+(\S+)/msx ) {
+                $m_exclude->{$1} = [] unless ( defined $m_exclude->{$1} );
+                push @{ $m_exclude->{$1} }, $2;
+            }
+            else {
+                croak "malformed exclude line $line";
+            }
+            next LINE;
+        }
+        if ($replaces) {
+            if ( $line =~ /^\s*[)]\s*$/msx ) {
+                $replaces = 0;
+            }
+            elsif ( $line =~ /^\s*(\S+)\s+=>\s+(\S+)\s*$/msx ) {
+                croak "duplicate replace for $1"
+                  if ( defined $m_replace->{$1} );
+                $m_replace->{$1} = $2;
+            }
+            else {
+                croak "malformed replace line $line";
+            }
+            next LINE;
+        }
+        if ($requires) {
+            if ( $line =~ /^\s*[)]\s*$/msx ) {
+                $requires = 0;
+            }
+            elsif ( $line =~ /^\s*(\S+)\s+(\S+).*$/msx ) {
+                croak "duplicate require for $1"
+                  if ( defined $m_require->{$1} );
+                $m_require->{$1} = $2;
+            }
+            else {
+                croak "malformed require line $line";
+            }
+            next LINE;
+        }
+
+        if ( $line =~ /^module\s+(\S+)$/msx ) {
+            $m->{module} = $1;
+        }
+        elsif ( $line =~ /^go\s+(\S+)$/msx ) {
+            $m->{go} = $1;
+        }
+        elsif ( $line =~ /^exclude\s+[(]\s*$/msx ) {
+
+            # beginning of exclude block
+            $excludes = 1;
+        }
+        elsif ( $line =~ /^replace\s+[(]\s*$/msx ) {
+
+            # beginning of replace block
+            $replaces = 1;
+        }
+        elsif ( $line =~ /^require\s+[(]\s*$/msx ) {
+
+            # beginning of require block
+            $requires = 1;
+        }
+        elsif ( $line =~ /^(?:exclude\s+(\S+\s+\S+))\s*$/msx ) {
+
+            # single exclude
+            $m_exclude->{$1} = [] unless ( defined $m_exclude->{$1} );
+            push @{ $m_exclude->{$1} }, $2;
+        }
+        elsif ( $line =~ /^(?:replace\s+(\S+\s+=>\s+\S+))\s*$/msx ) {
+
+            # single replace
+            croak "duplicate replace for $1"
+              if ( defined $m_replace->{$1} );
+            $m_replace->{$1} = $2;
+        }
+        elsif ( $line =~ /^(?:require\s+(\S+\s+\S+)).*$/msx ) {
+
+            # single require
+            croak "duplicate require for $1"
+              if ( defined $m_require->{$1} );
+            $m_require->{$1} = $2;
+        }
+        else {
+            croak "unknown line content: $line";
+        }
+        next LINE;
+    }
+
+    # check that module and go were set
     return $m;
 }
 
