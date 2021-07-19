@@ -120,7 +120,6 @@ sub parse_go_mod {
         else {
             croak "unknown line content: $line";
         }
-        next LINE;
     }
 
     croak 'missing module line' unless ( defined $m->{module} );
