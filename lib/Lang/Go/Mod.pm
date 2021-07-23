@@ -5,7 +5,6 @@ use Carp qw(croak);
 use English qw(-no_match_vars);
 use Exporter qw(import);
 use Path::Tiny qw(path);
-use experimental qw(switch);
 
 # ABSTRACT: Parse and model go.mod files
 
