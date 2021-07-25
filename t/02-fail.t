@@ -1,7 +1,6 @@
 package main;
 use File::Spec;
 use Test2::V0;
-use Test2::Tools::Exception;
 use Lang::Go::Mod qw(parse_go_mod);
 
 my $go_version = 'go 1.16';
