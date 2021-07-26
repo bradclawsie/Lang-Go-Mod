@@ -121,6 +121,11 @@ sub parse_go_mod {
               if ( defined $m->{'require'}->{$1} );
             $m->{'require'}->{$1} = $2;
         }
+	elsif ( $line =~ m!^\s*//.*$! ) {
+
+	    # comment
+
+	}
         else {
             croak "unknown line content: $line";
         }
