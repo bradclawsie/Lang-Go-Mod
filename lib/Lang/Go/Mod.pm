@@ -13,7 +13,7 @@ use Path::Tiny qw(path);
 
 # ABSTRACT: parse and model go.mod files
 
-our $VERSION   = '0.003';
+our $VERSION   = '0.004';
 our $AUTHORITY = 'cpan:bclawsie';
 
 our @EXPORT_OK = qw(read_go_mod parse_go_mod);
@@ -121,11 +121,11 @@ sub parse_go_mod {
               if ( defined $m->{'require'}->{$1} );
             $m->{'require'}->{$1} = $2;
         }
-	elsif ( $line =~ m!^\s*//.*$! ) {
+        elsif ( $line =~ m{^\s*//.*$}mx ) {
 
-	    # comment
+            # comment
 
-	}
+        }
         else {
             croak "unknown line content: $line";
         }
@@ -150,6 +150,7 @@ C<Lang::Go::Mod> - parse and model go.mod files
    # $ cat go.mod
    # module github.com/example/my-project
    # go 1.16
+   # // comments
    # exclude (
    #    example.com/whatmodule v1.4.0
    # )

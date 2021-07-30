@@ -6,3 +6,7 @@
 
 0.003 2021-07-29
   - Add some metadata for metacpan
+
+0.004 2021-07-29
+- Merge https://github.com/bradclawsie/Lang-Go-Mod/pull/1 for
+  comment processing
