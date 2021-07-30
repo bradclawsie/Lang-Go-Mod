@@ -13,7 +13,7 @@ use Path::Tiny qw(path);
 
 # ABSTRACT: parse and model go.mod files
 
-our $VERSION   = '0.004';
+our $VERSION   = '0.005';
 our $AUTHORITY = 'cpan:bclawsie';
 
 our @EXPORT_OK = qw(read_go_mod parse_go_mod);
@@ -202,5 +202,9 @@ return the hash representation of the contents. All errors C<croak>.
 Lang::Go::Mod is licensed under the same terms as Perl itself.
 
 https://opensource.org/licenses/artistic-license-2.0
+
+=head1 CONTRIBUTORS
+
+Ben Bullock (https://github.com/benkasminbullock)
 
 =cut
