@@ -3,3 +3,6 @@
 
 0.002 2021-07-26
   - Fix package requirement bugs
+
+0.003 2021-07-29
+  - Add some metadata for metacpan
