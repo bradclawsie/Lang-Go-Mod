@@ -4,7 +4,7 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     container:
-      image: b7j0c/perl:5.34.0
+      image: b7j0c/perl:build
       env:
         PERL5LIB: "/__w/Lang-Go-Mod/Lang-Go-Mod/lib"
         PERLCRITIC: "/__w/Lang-Go-Mod/Lang-Go-Mod/.perlcritic"

@@ -4,7 +4,7 @@ WORKDIR = /perl
 DOCKER_RUN = docker run --rm -it -v $(CWD):$(WORKDIR) -w $(WORKDIR)
 DZIL = dzil
 TEST_RUNNER = yath
-TIDY = perltidy
+TIDY = perltidier
 CRITIC = perlcritic
 CRITIC_ARGS =
 TCRITIC_ARGS = --theme=tests
