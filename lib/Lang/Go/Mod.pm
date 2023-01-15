@@ -1,7 +1,7 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Brad Clawsie, 2021 -- brad.clawsie@gmail.com
+#  (C) Brad Clawsie, 2023 -- brad.clawsie@gmail.com
 
 package Lang::Go::Mod;
 use warnings;
@@ -143,7 +143,7 @@ __END__
 
 =head1 NAME
 
-C<Lang::Go::Mod> - parse and model go.mod files
+Lang::Go::Mod - parse and model go.mod files
 
 =head1 SYNOPSIS
 
@@ -201,10 +201,10 @@ return the hash representation of the contents. All errors C<croak>.
 
 Lang::Go::Mod is licensed under the same terms as Perl itself.
 
-https://opensource.org/licenses/artistic-license-2.0
+L<https://opensource.org/licenses/artistic-license-2.0>
 
 =head1 CONTRIBUTORS
 
-Ben Bullock (https://github.com/benkasminbullock)
+Ben Bullock (L<https://github.com/benkasminbullock>)
 
 =cut

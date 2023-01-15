@@ -1,4 +1,4 @@
-IMG = b7j0c/perl:5.34.0
+IMG = b7j0c/perl:build
 CWD = $(shell pwd)
 WORKDIR = /perl
 DOCKER_RUN = docker run --rm -it -v $(CWD):$(WORKDIR) -w $(WORKDIR)
