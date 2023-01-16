@@ -6,9 +6,9 @@
 package Lang::Go::Mod;
 use warnings;
 use strict;
-use Carp       qw(croak);
-use English    qw(-no_match_vars);
-use Exporter   qw(import);
+use Carp qw(croak);
+use English qw(-no_match_vars);
+use Exporter qw(import);
 use Path::Tiny qw(path);
 
 # ABSTRACT: parse and model go.mod files
@@ -160,8 +160,8 @@ sub parse_go_mod {
         }
         elsif ( $line =~ m{^\s*//.*$}mx ) {
 
-# comment
-# (can also be part of a multi-line retract rationale - want to strip out anyway)
+            # comment - strip
+            # (can also be part of a multi-line retract rationale)
 
         }
         else {
