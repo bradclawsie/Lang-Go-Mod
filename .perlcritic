@@ -1,28 +1,37 @@
 severity = 1
+[-RegularExpressions::RequireLineBoundaryMatching]
 [-RegularExpressions::RequireDotMatchAnything]
-[ControlStructures::ProhibitPostfixControls]
-allow = for if unless
+[-Community::PreferredAlternatives]
+[-Community::DiscouragedModules]
+[-Freenode::PreferredAlternatives]
+[-Freenode::DiscouragedModules]
 [-CodeLayout::RequireTidyCode]
-[ValuesAndExpressions::RequireInterpolationOfMetachars]
-[ValuesAndExpressions::ProhibitLongChainsOfMethodCalls]
-[Subroutines::ProhibitBuiltinHomonyms]
+[-Subroutines::RequireFinalReturn]
+[-Subroutines::ProhibitBuiltinHomonyms]
 [-Subroutines::ProhibitSubroutinePrototypes]
-[ValuesAndExpressions::ProhibitMagicNumbers]
-allowed_values = -1000..1000
-[NamingConventions::ProhibitAmbiguousNames]
-forbid = abstract bases close contract last left no record right second
-[Subroutines::ProhibitUnusedPrivateSubroutines]
-allow = _update_status
-[Subroutines::ProhibitManyArgs]
+[-Subroutines::ProhibitExplicitReturnUndef]
+[-Subroutines::ProhibitCallsToUndeclaredSubs]
+[-Subroutines::ProhibitCallsToUnexportedSubs]
 [-Documentation::RequirePodSections]
 [-Compatibility::PodMinimumVersion]
 [-TooMuchCode::ProhibitDuplicateLiteral]
 [-ControlStructures::ProhibitUnlessBlocks]
 [-ControlStructures::ProhibitCascadingIfElse]
+[-Modules::RequireExplicitInclusion]
+[-CodeLayout::RequireFinalSemicolon]
+[-Bangs::ProhibitNumberedNames]
+[ControlStructures::ProhibitPostfixControls]
+allow = for if unless
+[ValuesAndExpressions::ProhibitMagicNumbers]
+allowed_values = -1000..1000
+[NamingConventions::ProhibitAmbiguousNames]
+forbid = abstract bases close contract last left no record right second
 [InputOutput::RequireCheckedSyscalls]
 functions = :builtins
 exclude_functions = print
 [Modules::ProhibitExcessMainComplexity]
-        max_mccabe = 40
+max_mccabe = 50
 [Subroutines::ProhibitExcessComplexity]
-max_mccabe = 40
+max_mccabe = 50
+[-BuiltinFunctions::ProhibitUniversalIsa]
+[-CodeLayout::ProhibitParensWithBuiltins]

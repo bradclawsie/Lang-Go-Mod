@@ -193,18 +193,18 @@ sub _parse_retract {
         my $rest  = $2;
 
         # trim whitespace from range
-        $range =~ s/\s+//g;
-        my @versions = split( /,/, $range );
+        $range =~ s/\s+//gx;
+        my @versions = split( /,/x, $range );
         my $count    = 0;
         for my $version (@versions) {
-            return unless ( $version =~ /\S+/ox );
+            return undef unless ( $version =~ /\S+/ox );
             $count++;
         }
-        return if ( $count != 2 );
+        return undef if ( $count != 2 );
 
         # if there is a comment, it must be properly formatted
         if ( $rest =~ /\S/x ) {
-            return unless ( $rest =~ m|^\s+//|ox );
+            return undef unless ( $rest =~ m{^\s+//}ox );
         }
         return '[' . $range . ']';
     }
@@ -214,13 +214,13 @@ sub _parse_retract {
 
         # if there is a comment, it must be properly formatted
         if ( $rest =~ /\S/x ) {
-            return unless ( $rest =~ m|^\s+//|ox );
+            return undef unless ( $rest =~ m{^\s+//}ox );
         }
         return $version;
     }
 
     # unparseable retract string
-    return;
+    return undef;
 }
 
 1;
