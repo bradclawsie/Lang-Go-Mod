@@ -10,4 +10,4 @@ tasks:
   - base-image: |
       docker pull b7j0c/perl:build
   - test: |
-      docker run --rm -v /home/build/Lang-Go-Mod:/perl -it b7j0c/perl:build make ci-critic ci-test
+      docker run --rm -v /home/build/Lang-Go-Mod:/perl b7j0c/perl:build make ci-critic ci-test
