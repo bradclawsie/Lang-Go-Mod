@@ -1,0 +1,13 @@
+image: archlinux
+tasks:
+  - update-pacman: |
+      sudo pacman -Sy
+  - install-pkgs: |
+      sudo pacman --noconfirm -S docker
+  - docker: |
+      sudo systemctl start docker.service && sleep 5
+      sudo usermod -a -G docker $(id -u -n)
+  - base-image: |
+      docker pull b7j0c/perl:build
+  - test: |
+      docker run --rm -v /home/build/Lang-Go-Mod:/perl -it b7j0c/perl:build make ci-critic ci-test
