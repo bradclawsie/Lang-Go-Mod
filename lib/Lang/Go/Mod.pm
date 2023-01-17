@@ -36,7 +36,7 @@ sub parse_go_mod {
     }
     my ( $excludes, $replaces, $requires, $retracts ) = ( 0, 0, 0, 0 );
 
-    LINE: for my $line ( split /\n/msx, $go_mod_content ) {
+    LINE: for my $line ( split /\n/x, $go_mod_content ) {
         next LINE if ( $line =~ /^\s*$/x );
         if ($excludes) {
             if ( $line =~ /^\s*[)]\s*$/x ) {
@@ -188,7 +188,7 @@ sub parse_go_mod {
 sub _parse_retract {
     my $retract = shift || croak 'missing retract string';
 
-    if ( $retract =~ /^\s*\[(.+?)\](.*)$/ox ) {    # version-range
+    if ( $retract =~ /^\s*\[(.+?)\](.*)$/x ) {    # version-range
         my $range = $1;
         my $rest  = $2;
 
@@ -197,7 +197,7 @@ sub _parse_retract {
         my @versions = split( /,/x, $range );
         my $count    = 0;
         for my $version (@versions) {
-            return undef unless ( $version =~ /\S+/ox );
+            return undef unless ( $version =~ /\S+/x );
             $count++;
         }
         return undef if ( $count != 2 );
@@ -208,7 +208,7 @@ sub _parse_retract {
         }
         return '[' . $range . ']';
     }
-    elsif ( $retract =~ /^\s*(\S+)(.*)$/ox ) {    # single version
+    elsif ( $retract =~ /^\s*(\S+)(.*)$/x ) {    # single version
         my $version = $1;
         my $rest    = $2;
 
