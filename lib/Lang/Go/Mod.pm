@@ -13,7 +13,7 @@ use Path::Tiny qw(path);
 
 # ABSTRACT: parse and model go.mod files
 
-our $VERSION   = '0.005';
+our $VERSION   = '0.006';
 our $AUTHORITY = 'cpan:bclawsie';
 
 our @EXPORT_OK = qw(read_go_mod parse_go_mod _parse_retract);
